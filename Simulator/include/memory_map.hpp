@@ -1,6 +1,7 @@
-unsigned char slaveAddress = 0b01011101;
+#pragma once
+#define SLAVE_ADDRESS 0b01011101
 
-enum MemoryAddresses
+enum class MemoryAddresses : char
 {
     ManufacturerId = 0x0F,
     PartId = 0x10,
@@ -17,8 +18,4 @@ enum MemoryAddresses
     TemperatureLSB = 0x1E
 };
 
-struct MemoryMap
-{
-    
-};
 

@@ -76,5 +76,9 @@ void SimulatorServer::sendResponse(const char* data, int len)
     int res = send(client, data, len, 0);
     if(res == -1)
         throw std::runtime_error("Send error!");
+
+    std::cout << "Send: " << res << " bytes: ";
+    printCharArray(data, res);
+    std::cout << std::endl;
 }
 

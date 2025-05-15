@@ -8,7 +8,12 @@ project(Simulator)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_EXECUTABLE_SUFFIX ".out")
 
-add_executable(Simulator src/main.cpp)
+add_executable(Simulator 
+    src/main.cpp
+    src/BM1390GLV_ZTR.cpp
+    include/BM1390GLV_ZTR.hpp
+    include/memory_map.hpp
+    )
 
 add_subdirectory(../CommunicationLib build)
 target_link_libraries(Simulator PUBLIC CommunicationLib)

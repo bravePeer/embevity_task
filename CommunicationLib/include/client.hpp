@@ -20,7 +20,7 @@ public:
     void connectToServer(const char* serverAddress);
 
     void writeReg(char address, const char* data, int dataLen);
-    void readReg(char address, char* data, int dataLen);
+    void readReg(char address, char* data, int* dataLen);
 
     void writeCommand(SpecialCommands command);
 

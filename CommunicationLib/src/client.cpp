@@ -46,6 +46,59 @@ void Client::connectToServer(const char* serverAddress)
     std::cout << "Connected to server!" << std::endl;
 }
 
+void Client::writeReg(char address, const char* data, int dataLen)
+{
+    if(dataLen > 16)
+        throw "Max send bytes is 16";
+    char buffer[17];
+    memcpy(buffer + 1, data, dataLen);
+    buffer[0] = static_cast<char>(address << 1);
+    int res = send(clientSocet, buffer, dataLen + 1, 0);
+    if (res == -1)
+        throw std::runtime_error("Send error!");
+
+    std::cout << "WriteReg Send: " << res << " bytes: ";
+    printCharArray(buffer, res);
+    std::cout << std::endl;
+
+    res = recv(clientSocet, buffer, sizeof(buffer), 0);
+    if(res == -1)
+        throw std::runtime_error("Receiving error!");
+        
+    std::cout << "WriteReg Received: " << res << " bytes: ";
+    printCharArray(buffer, res);
+    std::cout << std::endl;
+
+    if(res != 3 || !((buffer[0] == '\xff') && (buffer[1] == 'O') && (buffer[2] == 'K')))
+        throw std::runtime_error("Wrong respone!");
+}
+
+/// @brief 
+/// @param address address of device
+/// @param data min size is 1
+/// @param dataLen 
+void Client::readReg(char address, char* data, int* dataLen)
+{
+    char buffer[17]{0};
+    buffer[0] = static_cast<char>(address << 1) | 1;
+
+    int res = send(clientSocet, buffer, *dataLen + 1, 0);
+    if (res == -1)
+        throw std::runtime_error("Send error!");
+
+    std::cout << "ReadReg Send: " << res << " bytes: ";
+    printCharArray(buffer, res);
+    std::cout << std::endl;
+
+    *dataLen = recv(clientSocet, data, 16, 0);
+    if(*dataLen == -1)
+        throw std::runtime_error("Receiving error!");
+
+    std::cout << "ReadReg Received: " << res << " bytes: ";
+    printCharArray(buffer, res);
+    std::cout << std::endl;
+}
+
 void Client::writeCommand(SpecialCommands command)
 {
     char buffer[8]{0};

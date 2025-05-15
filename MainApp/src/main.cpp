@@ -24,6 +24,29 @@ int main(int argc, char** argv)
     Client c;
     c.connectToServer(SIMULATOR_SERVER);
     c.writeCommand(SpecialCommands::RestartSimulator);
+    char buffer[16]{0};
+    int len = 1;
+
+    buffer[0] = 0x12;
+    c.writeReg(0b1011101, buffer, 1); // Set read reg
+    c.readReg(0b1011101, buffer, &len);
+
+    std::cout<<"Reg val = ";
+    printCharArray(buffer, len);
+    std::cout << std::endl;
+
+    buffer[0] = 0x12;
+    buffer[1] = 1;
+    c.writeReg(0b1011101, buffer, 2); // Set read reg
+    
+    buffer[0] = 0x12;
+    c.writeReg(0b1011101, buffer, 1); // Set read reg
+    c.readReg(0b1011101, buffer, &len);
+
+    std::cout<<"Reg val = ";
+    printCharArray(buffer, len);
+    std::cout << std::endl;
+
     c.writeCommand(SpecialCommands::RestartSimulator);
     c.writeCommand(SpecialCommands::StopSimulator);
     // SimulatorServer ss;
