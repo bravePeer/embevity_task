@@ -5,6 +5,9 @@
 int main()
 {
     BM1390GLV_ZTR bm;
+    const char* logFilePath = "222.txt";
+    bm.initLoadPressTempFromFile(logFilePath);
+
     SimulatorServer server;
     server.waitForConnection();
 
@@ -37,15 +40,18 @@ int main()
             else
                 server.sendResponse("\xffOK", 3);
 
-
+            bm.updatePressTempFromFile();
             break;
         }
         case SpecialCommands::ReloadFile:
             server.sendResponse("\xffOK", 3);
             std::cout << "ReloadFile" << std::endl;
+            bm.initLoadPressTempFromFile(logFilePath);
             break;
         case SpecialCommands::RestartSimulator:
             server.sendResponse("\xffOK", 3);
+            bm.restart();
+            bm.initLoadPressTempFromFile(logFilePath);
             std::cout << "RestartSimulator" << std::endl;
             break;
         case SpecialCommands::StopSimulator:

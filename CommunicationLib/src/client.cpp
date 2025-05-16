@@ -76,7 +76,7 @@ void Client::writeReg(char address, const char* data, int dataLen)
 /// @brief 
 /// @param address address of device
 /// @param data min size is 1
-/// @param dataLen 
+/// @param dataLen how many bytes to read
 void Client::readReg(char address, char* data, int* dataLen)
 {
     char buffer[17]{0};
@@ -95,7 +95,7 @@ void Client::readReg(char address, char* data, int* dataLen)
         throw std::runtime_error("Receiving error!");
 
     std::cout << "ReadReg Received: " << res << " bytes: ";
-    printCharArray(buffer, res);
+    printCharArray(data, res);
     std::cout << std::endl;
 }
 

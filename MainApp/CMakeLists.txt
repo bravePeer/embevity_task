@@ -8,7 +8,11 @@ project(MainApp)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_EXECUTABLE_SUFFIX ".out")
 
-add_executable(MainApp src/main.cpp)
+add_executable(MainApp 
+    src/main.cpp
+    include/sensor.hpp
+    src/sensor.cpp
+    )
 add_subdirectory(../CommunicationLib build)
 target_link_libraries(MainApp PUBLIC CommunicationLib)
 target_include_directories(MainApp PUBLIC "include" "../CommunicationLib/include")

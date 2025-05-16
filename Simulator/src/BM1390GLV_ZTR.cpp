@@ -1,5 +1,11 @@
 #include "BM1390GLV_ZTR.hpp"
 
+BM1390GLV_ZTR::~BM1390GLV_ZTR()
+{
+    if(logFile.is_open())
+        logFile.close();
+}
+
 void BM1390GLV_ZTR::processI2C(char* data, int* dataLen, int* shouldAnswer)
 {
     if(((data[0] >> 1) & 0b01111111) != SLAVE_ADDRESS)
@@ -34,10 +40,12 @@ void BM1390GLV_ZTR::writeReg(MemoryAddresses addr, char val)
         memory.powerDown = val & 0x01;
         break;
     case MemoryAddresses::Reset:
-        memory.reset = val & 0x01;
+        if(memory.powerDown & 0x01)
+            memory.reset = val & 0x01;
         break;
     case MemoryAddresses::ModeControl:
-        memory.modeControl = val;
+        if(memory.reset & 0x01)
+            memory.modeControl = val;
         break;
     case MemoryAddresses::IIRFifoControl:
         memory.modeControl = val & 0b11000011;
@@ -66,15 +74,75 @@ char BM1390GLV_ZTR::readReg(MemoryAddresses addr)
     case MemoryAddresses::Status:
         return memory.status;
     case MemoryAddresses::PressureMSB:
+        updateNeeded = true;
         return memory.pressureMSB;
     case MemoryAddresses::PressureLSB:
+        updateNeeded = true;
         return memory.pressureLSB;
     case MemoryAddresses::PressureXL:
+        updateNeeded = true;
         return memory.pressureXL;
     case MemoryAddresses::TemperatureMSB:
+        updateNeeded = true;
         return memory.temperatureMSB;
     case MemoryAddresses::TemperatureLSB:
+        updateNeeded = true;
         return memory.temperatureLSB;
     }
     return 0;
+}
+
+void BM1390GLV_ZTR::initLoadPressTempFromFile(const char* path)
+{
+    if(logFile.is_open())
+        logFile.close();
+    logFile.open(path, std::ios_base::in);
+
+    updatePressTempFromFile();
+}
+
+void BM1390GLV_ZTR::updatePressTempFromFile()
+{
+    if(!updateNeeded)
+        return;
+        
+    std::string tmp;
+    for (int i = 0; i < 21; i++)
+        logFile >> tmp;
+
+    int pressure = atoi(tmp.c_str());
+    logFile >> tmp;
+    logFile >> tmp;
+    double temperature = atof(tmp.c_str());
+
+    for (int i = 0; i < 8; i++) // new line
+        logFile >> tmp;    
+
+    pressure = (pressure * 2048) / 100;
+    memory.pressureMSB = static_cast<char>(pressure >> 14);
+    memory.pressureLSB = static_cast<char>(pressure >> 6);
+    memory.pressureXL = static_cast<char>(pressure & 0x3f);
+
+    temperature = temperature * 32;
+    int temperatureInt = static_cast<int>(temperature);
+    memory.temperatureLSB = static_cast<char>(temperatureInt);
+    memory.temperatureMSB = static_cast<char>(temperatureInt >> 8);
+    std::cout<<pressure << " "<< temperature<<std::endl;
+}
+
+void BM1390GLV_ZTR::restart()
+{
+    memory.powerDown = 0;
+    memory.reset = 0;
+    memory.modeControl = 0;
+    memory.iirFifoControl = 0;
+    memory.fifoData = 0;
+    memory.status = 0;
+    memory.pressureMSB = 0;
+    memory.pressureLSB = 0;
+    memory.pressureXL = 0;
+    memory.temperatureMSB = 0;
+    memory.temperatureLSB = 0;
+
+    updateNeeded = false;
 }

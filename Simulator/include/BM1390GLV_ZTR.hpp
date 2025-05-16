@@ -1,21 +1,29 @@
 #pragma once
 #include <iostream>
+#include <fstream>
 #include "memory_map.hpp"
 
 class BM1390GLV_ZTR
 {
 public:
+    ~BM1390GLV_ZTR();
+
     void processI2C(char* data, int* dataLen, int* shouldAnswer);
 
     void writeReg(MemoryAddresses addr, char val);
     char readReg(MemoryAddresses addr);
 
-    void initLoadPressTempFromFile();
+    /// @brief Open log file and load first data
+    /// @param path path to file
+    void initLoadPressTempFromFile(const char* path);
 
-    void update();
+    void updatePressTempFromFile();
+
+    void restart();
 
 private:
-    struct Memory{
+    struct Memory
+    {
         const char manufacturerId = '\xe0';
         const char partId = '\x34';
         char powerDown = 0;
@@ -32,4 +40,8 @@ private:
     };
     Memory memory;
     char registerAddr = 0;
+
+    bool updateNeeded = false;
+    bool fileInitialized = false;
+    std::fstream logFile;
 };
