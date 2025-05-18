@@ -57,17 +57,21 @@ void Client::writeReg(char address, const char* data, int dataLen)
     if (res == -1)
         throw std::runtime_error("Send error!");
 
+#ifdef DEBUG_PRINT
     std::cout << "WriteReg Send: " << res << " bytes: ";
     printCharArray(buffer, res);
     std::cout << std::endl;
+#endif
 
     res = recv(clientSocet, buffer, sizeof(buffer), 0);
     if(res == -1)
         throw std::runtime_error("Receiving error!");
         
+#ifdef DEBUG_PRINT
     std::cout << "WriteReg Received: " << res << " bytes: ";
     printCharArray(buffer, res);
     std::cout << std::endl;
+#endif
 
     if(res != 3 || !((buffer[0] == '\xff') && (buffer[1] == 'O') && (buffer[2] == 'K')))
         throw std::runtime_error("Wrong respone!");
@@ -86,17 +90,21 @@ void Client::readReg(char address, char* data, int* dataLen)
     if (res == -1)
         throw std::runtime_error("Send error!");
 
+#ifdef DEBUG_PRINT
     std::cout << "ReadReg Send: " << res << " bytes: ";
     printCharArray(buffer, res);
     std::cout << std::endl;
+#endif
 
     *dataLen = recv(clientSocet, data, 16, 0);
     if(*dataLen == -1)
         throw std::runtime_error("Receiving error!");
 
-    std::cout << "ReadReg Received: " << res << " bytes: ";
-    printCharArray(data, res);
+#ifdef DEBUG_PRINT
+    std::cout << "ReadReg Received: " << *dataLen << " bytes: ";
+    printCharArray(data, *dataLen);
     std::cout << std::endl;
+#endif
 }
 
 void Client::writeCommand(SpecialCommands command)
@@ -108,17 +116,21 @@ void Client::writeCommand(SpecialCommands command)
     if (res == -1)
         throw std::runtime_error("Send error!");
 
+#ifdef DEBUG_PRINT
     std::cout << "Send: " << res << " bytes to server: ";
     printCharArray(buffer, res);
     std::cout << std::endl;
+#endif
 
     res = recv(clientSocet, buffer, sizeof(buffer), 0);
     if(res == -1)
         throw std::runtime_error("Receiving error!");
         
+#ifdef DEBUG_PRINT
     std::cout << "Received: " << res << " bytes: ";
     printCharArray(buffer, res);
     std::cout << std::endl;
+#endif
 
     if(res != 3 || !((buffer[0] == '\xff') && (buffer[1] == 'O') && (buffer[2] == 'K')))
         throw std::runtime_error("Wrong respone!");
