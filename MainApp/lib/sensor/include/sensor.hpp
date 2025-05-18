@@ -4,18 +4,7 @@
 #include "client.hpp"
 #include "../../Simulator/include/memory_map.hpp"
 
-void readSensorReg(Client* c, MemoryAddresses addr)
-{
-    char buffer[1];
-    buffer[0] = static_cast<char>(addr);
-    int len = 1;
-    c->writeReg(SLAVE_ADDRESS, buffer, 1); // Set read reg
-    c->readReg(SLAVE_ADDRESS, buffer, &len);
-
-    std::cout<<"Reg val = ";
-    printCharArray(buffer, len);
-    std::cout << std::endl;
-}
+void readSensorReg(Client* c, MemoryAddresses addr);
 
 /// @brief Sets register responsible for power up device
 /// @param c pointer to client
@@ -47,6 +36,9 @@ void readPressureTemperature(Client* c, int* pressure, float* temperature)
     buffer[0] = static_cast<char>(MemoryAddresses::PressureMSB);
     c->writeReg(SLAVE_ADDRESS, buffer, 1);
     c->readReg(SLAVE_ADDRESS, buffer, &len);
+
+    if(len != 5)
+        throw "ERROR: received wrong number of bytes";
 
     int tmpPress = buffer[0] & 0xff;
     tmpPress <<= 8;
