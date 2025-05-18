@@ -14,6 +14,10 @@ PositionDetector::~PositionDetector()
 
 void PositionDetector::init()
 {
+    if(ringBuffer)
+        delete ringBuffer;
+    ringBuffer = new RingBuffer<int>(measurementsCount);
+
     setPowerDown(client, 1);
     setReset(client, 1);
     
@@ -35,12 +39,14 @@ void PositionDetector::setMeasurementCount(int val)
     measurementsCount = val;
 }
 
-void PositionDetector::update()
+int PositionDetector::update()
 {
     updatePressure();
     int pressure = calculatePressureMean();
     
     std::cout << "Pressure: "<< pressure << " Last pressure: "<< lastPossibleCorrectPressureVal << " Counts: " << correctCounts << " Possible change: " << possibleChange << std::endl;
+
+    int floorChanged = 0;
 
     if(possibleChange)
     {
@@ -62,13 +68,18 @@ void PositionDetector::update()
 
     if(correctCounts == measurementsCount)
     {
-        std::cout<<"Floor changed"<<std::endl;
+        if(lastPressureVal - pressure < sensivityChange)
+            floorChanged = -1;
+        else
+            floorChanged = 1;
+
         possibleChange = false;
         correctCounts = 0;
         lastPossibleCorrectPressureVal = pressure;
     }
 
     lastPressureVal = pressure;
+    return floorChanged;
 }
 
 int PositionDetector::readNextPressureVal()

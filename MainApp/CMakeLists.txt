@@ -8,7 +8,11 @@ set(CMAKE_EXECUTABLE_SUFFIX ".out")
 
 add_executable(MainApp 
     src/main.cpp
+    src/ui.cpp
     )
+
+target_include_directories(MainApp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
 
 add_subdirectory(../CommunicationLib build)
 add_subdirectory(lib/position_detector)

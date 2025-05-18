@@ -23,7 +23,7 @@ public:
     void updatePressure();
     int calculatePressureMean();
 
-    void update();
+    int update();
     int readNextPressureVal();
 
 private:

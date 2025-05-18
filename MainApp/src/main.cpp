@@ -11,9 +11,12 @@
 #include "server.hpp"
 #include "client.hpp"
 #include "position_detector.hpp"
+#include "ui.hpp"
 
 int main(int argc, char** argv)
 {
+    UI ui;
+
     Client c;
     c.connectToServer(SIMULATOR_SERVER);
     c.writeCommand(SpecialCommands::RestartSimulator);
@@ -21,23 +24,55 @@ int main(int argc, char** argv)
     PositionDetector detector(&c);
 
     detector.init();
-    while (true)
+    bool running = true;
+    int simulating = 0; // How many times simulator run
+    while (running)
     {
-        detector.update();
-        getchar();
+        // detector.update();
+        // getchar();
+
+        if(simulating)
+        {
+            int t = detector.update();
+            if(t > 0)
+            {
+                std::cout << "Floor up" << std::endl;
+            }
+            else if(t < 0)
+            {
+                std::cout << "Floor down" << std::endl;
+            }
+            usleep(1000);
+            simulating--;
+            continue;
+        }
+
+        UI::Command command = ui.processInput();
+
+        switch (command)
+        {
+        case UI::Command::Run:
+            detector.init();
+            simulating = ui.getValueToSet();
+            break;
+        case UI::Command::SetMeasurementsCount:
+            detector.setMeasurementCount(ui.getValueToSet());
+            break;
+        case UI::Command::SetSensivity:
+            detector.setSensivityChange(ui.getValueToSet());
+            break;
+        case UI::Command::Reset:
+            c.writeCommand(SpecialCommands::RestartSimulator);
+            // detector.reset();
+            break;
+        case UI::Command::Exit:
+            running = false;
+            break;
+        case UI::Command::None:
+        default:
+            ui.printHelp();
+            break;
+        }
+
     }
-
-    // std::cout << "Mean: " << detector.calculatePressureMean() << std::endl;
-    // int pressure = 0;
-    // float temperature = 0.0f;
-    // readPressureTemperature(&c, &pressure, &temperature);
-    // std::cout << pressure << " " << temperature << std::endl;
-    // readPressureTemperature(&c, &pressure, &temperature);
-    // std::cout << pressure << " " << temperature << std::endl;
-    
-    // c.writeCommand(SpecialCommands::RestartSimulator);
-    // c.writeCommand(SpecialCommands::StopSimulator);
-    // SimulatorServer ss;
-    // ss.waitForConnection();
-
 }
