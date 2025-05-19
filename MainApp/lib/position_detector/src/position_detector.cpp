@@ -44,7 +44,8 @@ void PositionDetector::deinit()
 void PositionDetector::setSensivityChange(int val)
 {
     if(val < minSensivityChange || val > maxSensivityChange)
-        throw "Error wrong walue";
+        throw std::invalid_argument("Error wrong walue, value must be beetween: " + std::to_string(minSensivityChange) 
+        + " and " + std::to_string(maxSensivityChange));
 
     sensivityChange = val;
 }
@@ -52,7 +53,8 @@ void PositionDetector::setSensivityChange(int val)
 void PositionDetector::setMeasurementCount(int val)
 {
     if(val < minMeasurementsCount || val > maxMeasurementsCount)
-        throw "Error wrong walue";
+        throw std::invalid_argument("Error wrong walue, value must be beetween: " + std::to_string(minMeasurementsCount) 
+        + " and " + std::to_string(maxMeasurementsCount));
 
     measurementsCount = val;
 }
@@ -128,7 +130,7 @@ int PositionDetector::calculatePressureMean()
     }
     
     if(dataCount == 0)
-        throw "ERROR";
+        return 0;
 
     return static_cast<int>(mean / dataCount);
 }

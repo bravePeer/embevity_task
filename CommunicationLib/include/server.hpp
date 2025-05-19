@@ -5,9 +5,11 @@
 #include <sys/un.h>
 #include "special_commands.hpp"
 #include "utils.hpp"
+#include "exceptions.hpp"
 
-// #define SIMULATOR_SERVER "unix_sock.server"
-#define SIMULATOR_SERVER "simulator.server"
+#define DEBUG_PRINT
+
+constexpr const char* SIMULATOR_SERVER = "simulator.server";
 
 class SimulatorServer
 {

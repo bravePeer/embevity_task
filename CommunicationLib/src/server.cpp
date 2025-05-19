@@ -3,11 +3,13 @@
 SimulatorServer::SimulatorServer()
 {
     // memset(&address, 0, sizeof(address));
+#ifdef DEBUG_PRINT
     std::cout << "Initializing server..." << std::endl;
+#endif
 
     serverSocket = socket(AF_LOCAL, SOCK_STREAM, 0);
     if(serverSocket == -1)
-        throw std::runtime_error("Socket can not be opened!"); 
+        throw SocketError(strerror(errno)); 
 
     serverSocketAddress.sun_family = AF_LOCAL;
     serverSocketAddress.sun_path[0] = 0;
@@ -18,50 +20,61 @@ SimulatorServer::SimulatorServer()
     if(result == -1)
     {
         close(serverSocket);
-        throw std::runtime_error("Bind error!");
+        throw BindError(strerror(errno));
     }
 
     result = listen(serverSocket, 1);
     if(result == -1)
     {
         close(serverSocket);
-        throw std::runtime_error("Listen error!");
+        throw ListenError(strerror(errno));
     }
 
+#ifdef DEBUG_PRINT
     std::cout << "Server initialized, socet name:" << SIMULATOR_SERVER << std::endl;
+#endif
 }
 
 SimulatorServer::~SimulatorServer()
 {
     close(serverSocket);
     close(client);
-    std::cout << "Server closed" << std::endl;
+
+#ifdef DEBUG_PRINT
+   std::cout << "Server closed" << std::endl;
+#endif
 }
 
 void SimulatorServer::waitForConnection()
 {
+#ifdef DEBUG_PRINT
     std::cout << "Waiting for connection" << std::endl;
-    socklen_t len = sizeof(clientSocketAddress);
+#endif
+
     client = accept(serverSocket, nullptr, nullptr);
     if(client == -1)
     {
         close(serverSocket);
         close(client);
-        throw std::runtime_error("Client connection error!");
+        throw ConnectionError(strerror(errno));
     }
 
+#ifdef DEBUG_PRINT
     std::cout << "Connected to client at: " << clientSocketAddress.sun_path << std::endl; 
+#endif
 }
 
 void SimulatorServer::receiveData(char* buffer, int* len, SpecialCommands* command)
 {
-    int res = recv(client, buffer, *len, 0);
+    int res = static_cast<int>(recv(client, buffer, *len, 0));
     if(res == -1)
-        throw std::runtime_error("Receiving error!");
-
+        throw ReceiveError(strerror(errno));
+        
+#ifdef DEBUG_PRINT
     std::cout << "Received: " << res << " bytes: ";
     printCharArray(buffer, res);
     std::cout << std::endl;
+#endif
 
     *len = res;
     
@@ -73,12 +86,14 @@ void SimulatorServer::receiveData(char* buffer, int* len, SpecialCommands* comma
 
 void SimulatorServer::sendResponse(const char* data, int len)
 {
-    int res = send(client, data, len, 0);
+    int res = static_cast<int>(send(client, data, len, 0));
     if(res == -1)
-        throw std::runtime_error("Send error!");
+        throw SendError(strerror(errno));
 
+#ifdef DEBUG_PRINT
     std::cout << "Send: " << res << " bytes: ";
     printCharArray(data, res);
     std::cout << std::endl;
+#endif
 }
 

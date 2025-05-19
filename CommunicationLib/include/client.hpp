@@ -6,10 +6,11 @@
 #include <sys/un.h>
 #include <string>
 
+#include "exceptions.hpp"
 #include "special_commands.hpp"
 #include "utils.hpp"
 
-#define SIMULATOR_CLIENT "simulator.client"
+constexpr const char* SIMULATOR_CLIENT = "simulator.client";
 
 class Client
 {

@@ -48,7 +48,7 @@ void readPressureTemperature(Client* c, int* pressure, float* temperature)
         c->readReg(SLAVE_ADDRESS, buffer, &len);
         
         if(len != 1)
-            throw "ERROR: received wrong number of bytes";
+            throw ReceiveValueError("Received wrong number of bytes");
 
         if(buffer[0] & MASK_STATUS_RD_DRDY)
             break;
@@ -60,7 +60,7 @@ void readPressureTemperature(Client* c, int* pressure, float* temperature)
     c->readReg(SLAVE_ADDRESS, buffer, &len);
 
     if(len != 5)
-        throw "ERROR: received wrong number of bytes";
+        throw ReceiveValueError("Received wrong number of bytes");
 
     int tmpPress = buffer[0] & 0xff;
     tmpPress <<= 8;
