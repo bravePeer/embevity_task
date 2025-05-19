@@ -28,7 +28,12 @@ public:
     /// @return If 0 no floor chaned, if -1 floor down, if 1 floor up
     int update();
     
-    int readNextPressureVal();
+    void updatePressureTemperature();
+
+    bool isInitialized();
+
+    int getPressure();
+    float getTemperature();
 
 private:
     Client* client;
@@ -47,6 +52,9 @@ private:
 
     int correctCounts = 0;
     bool possibleChange = false;
+
+    float temperature = 0.0f;
+    int pressure = 0;
 
     RingBuffer<int>* ringBuffer;
 };

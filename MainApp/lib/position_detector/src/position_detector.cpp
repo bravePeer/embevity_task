@@ -14,6 +14,9 @@ PositionDetector::~PositionDetector()
 
 void PositionDetector::init()
 {
+    if(initialized)
+        return;
+    
     if(ringBuffer)
         delete ringBuffer;
     ringBuffer = new RingBuffer<int>(measurementsCount);
@@ -21,6 +24,8 @@ void PositionDetector::init()
     setPowerDown(client, 1);
     setReset(client, 1);
     setControlMode(client, MODE_CONTROL_AVE_NUM_8_TIMES | MODE_CONTROL_MODE_CONTINOUS);
+
+    initialized = true;
 }
 
 void PositionDetector::deinit()
@@ -28,6 +33,12 @@ void PositionDetector::deinit()
     setControlMode(client, MODE_CONTROL_AVE_NUM_8_TIMES | MODE_CONTROL_MODE_STANDBY);
     setReset(client, 0);
     setPowerDown(client, 0);
+
+    initialized = false;
+    lastPressureVal = 0;
+    lastPossibleCorrectPressureVal = 0;
+    correctCounts = 0;
+    possibleChange = false;
 }
 
 void PositionDetector::setSensivityChange(int val)
@@ -49,15 +60,15 @@ void PositionDetector::setMeasurementCount(int val)
 int PositionDetector::update()
 {
     updatePressure();
-    int pressure = calculatePressureMean();
+    int meanPressure = calculatePressureMean();
     
-    std::cout << "Pressure: "<< pressure << " Last pressure: "<< lastPossibleCorrectPressureVal << " Counts: " << correctCounts << " Possible change: " << possibleChange << std::endl;
+    // std::cout << "Pressure: "<< meanPressure << " Last pressure: "<< lastPossibleCorrectPressureVal << " Counts: " << correctCounts << " Possible change: " << possibleChange << std::endl;
 
     int floorChanged = 0;
 
     if(possibleChange)
     {
-        if(abs(lastPressureVal - pressure) < sensivityChange)
+        if(abs(lastPressureVal - meanPressure) < sensivityChange)
         {
             correctCounts++;
         }
@@ -68,39 +79,35 @@ int PositionDetector::update()
         }
     }
 
-    if(abs(lastPossibleCorrectPressureVal - pressure) > sensivityChange)
+    if(abs(lastPossibleCorrectPressureVal - meanPressure) > sensivityChange)
     {
         possibleChange = true;
     }
 
     if(correctCounts == measurementsCount)
     {
-        if(lastPressureVal - pressure < sensivityChange)
+        if(lastPossibleCorrectPressureVal - meanPressure < sensivityChange)
             floorChanged = -1;
         else
             floorChanged = 1;
 
         possibleChange = false;
         correctCounts = 0;
-        lastPossibleCorrectPressureVal = pressure;
+        lastPossibleCorrectPressureVal = meanPressure;
     }
 
-    lastPressureVal = pressure;
+    lastPressureVal = meanPressure;
     return floorChanged;
 }
 
-int PositionDetector::readNextPressureVal()
+void PositionDetector::updatePressureTemperature()
 {
-    int pressure = 0;
-    float temperature = 0.0f;
     readPressureTemperature(client, &pressure, &temperature);
-
-    return pressure;
 }
 
 void PositionDetector::updatePressure()
 {
-    int pressure = readNextPressureVal();
+    updatePressureTemperature();
     if(ringBuffer->pushData(pressure) == -1)
     {
         int oldestPressure;
@@ -124,4 +131,19 @@ int PositionDetector::calculatePressureMean()
         throw "ERROR";
 
     return static_cast<int>(mean / dataCount);
+}
+
+bool PositionDetector::isInitialized()
+{
+    return initialized;
+}
+
+int PositionDetector::getPressure()
+{
+    return lastPressureVal;
+}
+
+float PositionDetector::getTemperature()
+{
+    return temperature;
 }

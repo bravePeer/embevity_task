@@ -14,7 +14,9 @@ public:
         Reset,
         SetSensivity,
         SetMeasurementsCount,
-        Run
+        Run,
+        Init,
+        Help
     };
 
     Command processInput();
@@ -22,10 +24,11 @@ public:
     int getValueToSet();
 
     void printHelp();
-    void printValueChanged();
-    void printReset();
-    void printResult();
+    void printValueChanged(const std::string& valueName, int actualValue);
+    void printResults(int floorChange, int pressure, float temperature);
 
+    void printError(const std::string& error);
+    void printInfo(const std::string& info);
 
 private:
     std::vector<std::string> split(const std::string &s, char delim);
