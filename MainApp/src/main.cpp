@@ -73,6 +73,6 @@ int main(int argc, char** argv)
             ui.printHelp();
             break;
         }
-
     }
+    detector.deinit();
 }

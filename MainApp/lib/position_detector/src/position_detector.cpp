@@ -20,7 +20,14 @@ void PositionDetector::init()
 
     setPowerDown(client, 1);
     setReset(client, 1);
-    
+    setControlMode(client, MODE_CONTROL_AVE_NUM_8_TIMES | MODE_CONTROL_MODE_CONTINOUS);
+}
+
+void PositionDetector::deinit()
+{
+    setControlMode(client, MODE_CONTROL_AVE_NUM_8_TIMES | MODE_CONTROL_MODE_STANDBY);
+    setReset(client, 0);
+    setPowerDown(client, 0);
 }
 
 void PositionDetector::setSensivityChange(int val)

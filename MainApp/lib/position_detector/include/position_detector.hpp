@@ -19,11 +19,15 @@ public:
     void setMeasurementCount(int val);
     
     void init();
+    void deinit();
     
     void updatePressure();
     int calculatePressureMean();
 
+    /// @brief Update pressure value and calculate floor change
+    /// @return If 0 no floor chaned, if -1 floor down, if 1 floor up
     int update();
+    
     int readNextPressureVal();
 
 private:

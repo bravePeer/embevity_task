@@ -27,10 +27,34 @@ void setReset(Client* c, char val)
     c->writeReg(SLAVE_ADDRESS, buffer, 2);
 }
 
+void setControlMode(Client* c, char mode)
+{
+    char buffer[2];
+    buffer[0] = static_cast<char>(MemoryAddresses::ModeControl);
+    buffer[1] = mode;
+    c->writeReg(SLAVE_ADDRESS, buffer, 2);
+}
+
 void readPressureTemperature(Client* c, int* pressure, float* temperature)
 {
     char buffer[5];
-    int len = 5;
+    int len = 1;
+
+    // Check if data ready to read
+    while(true)
+    {
+        buffer[0] = static_cast<char>(MemoryAddresses::Status);
+        c->writeReg(SLAVE_ADDRESS, buffer, 1);
+        c->readReg(SLAVE_ADDRESS, buffer, &len);
+        
+        if(len != 1)
+            throw "ERROR: received wrong number of bytes";
+
+        if(buffer[0] & MASK_STATUS_RD_DRDY)
+            break;
+    }
+
+    len = 5;
     buffer[0] = static_cast<char>(MemoryAddresses::PressureMSB);
     c->writeReg(SLAVE_ADDRESS, buffer, 1);
     c->readReg(SLAVE_ADDRESS, buffer, &len);

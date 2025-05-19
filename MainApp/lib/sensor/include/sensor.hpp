@@ -20,6 +20,11 @@ void setPowerDown(Client* c, char val);
 /// @param val If 1 device is ready to work else if 0 is in reset mode
 void setReset(Client* c, char val);
 
+/// @brief Sets MODE_CONTROL register
+/// @param c Pointer to client to connect to simulator
+/// @param mode Value of MODE_CONTROL register
+void setControlMode(Client* c, char mode);
+
 /// @brief Reads pressure and temperature from sensor if error occure throw exception
 /// @param c Pointer to client to connect to simulator
 /// @param pressure Pointer where to store pressure in Pa
