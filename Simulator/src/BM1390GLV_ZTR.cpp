@@ -1,4 +1,5 @@
 #include "BM1390GLV_ZTR.hpp"
+#include <unistd.h>
 
 BM1390GLV_ZTR::~BM1390GLV_ZTR()
 {
@@ -56,8 +57,10 @@ void BM1390GLV_ZTR::writeReg(MemoryAddresses addr, char val)
             return;
 
         // Check prohibited AVE_NUM
-        if((val & MASK_MODE_CONTROL_AVE_NUM) < MODE_CONTROL_AVE_NUM_8_TIMES 
-            && (val & MASK_MODE_CONTROL_AVE_NUM) > MODE_CONTROL_AVE_NUM_32_TIMES)
+        if(!((val & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_8_TIMES
+            || (val & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_16_TIMES
+            || (val & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_32_TIMES
+            || (val & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_64_TIMES))
             return;
 
         updateNeeded = true;
@@ -180,6 +183,17 @@ void BM1390GLV_ZTR::updatePressTempFromFile()
     memory.temperatureLSB = static_cast<char>(temperatureInt);
     memory.temperatureMSB = static_cast<char>(temperatureInt >> 8);
     //std::cout<<pressure << " "<< temperature<<std::endl;
+
+    // Fake delay measuring
+    if((memory.modeControl & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_8_TIMES)
+        usleep(25000);
+    else if((memory.modeControl & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_16_TIMES)
+        usleep(40000);
+    else if((memory.modeControl & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_32_TIMES)
+        usleep(76000);
+    else if((memory.modeControl & MASK_MODE_CONTROL_AVE_NUM) == MODE_CONTROL_AVE_NUM_64_TIMES)
+        usleep(152000);
+
     memory.status |= MASK_STATUS_RD_DRDY;
 }
 
