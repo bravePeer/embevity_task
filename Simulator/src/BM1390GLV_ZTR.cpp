@@ -172,7 +172,8 @@ void BM1390GLV_ZTR::updatePressTempFromFile()
     pressure = (pressure * 2048) / 100;
     memory.pressureMSB = static_cast<char>(pressure >> 14);
     memory.pressureLSB = static_cast<char>(pressure >> 6);
-    memory.pressureXL = static_cast<char>(pressure & 0x3f);
+    memory.pressureXL = static_cast<char>(pressure << 2);
+    // memory.pressureXL = static_cast<char>(pressure & 0x3f);
 
     temperature = temperature * 32;
     int temperatureInt = static_cast<int>(temperature);

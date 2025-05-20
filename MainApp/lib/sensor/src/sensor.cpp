@@ -66,7 +66,8 @@ void readPressureTemperature(Client* c, int* pressure, float* temperature)
     tmpPress <<= 8;
     tmpPress |=  buffer[1] & 0xff;
     tmpPress <<= 6;
-    tmpPress |=  buffer[2] & 0x3f;
+    tmpPress |=  (buffer[2] >> 2) & 0x3f;
+    // tmpPress |=  buffer[2] & 0x3f;
     
 
     float tmpPressF = (static_cast<float>(tmpPress) / 2048.f) * 100.f;
